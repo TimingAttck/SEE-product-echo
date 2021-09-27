@@ -11,7 +11,7 @@ public class EchoController {
     @GetMapping("/echo")
     public EchoResponse echo(@RequestParam(value="name", required=true) String name) {
 
-        if (name.isBlank())
+        if (name.isBlank() || name.isEmpty())
             name = "Anon";
 
         return new EchoResponse("Hello "+name+", you are awesome :)");
