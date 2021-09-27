@@ -1,0 +1,131 @@
+body {
+    background-color: #222222;
+    color: #ffffff;
+    font-weight: 600;
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:active {
+	transform: scale(0.95);
+	transition: all 0.5 ease;
+}
+
+.title {
+    position: absolute;
+    top: 3em;
+    left: 3em;
+    font-style: italic;
+    font-size: 1.2em;
+}
+
+.title > div {
+    font-size: 80%;
+}
+
+.input-wrapper {
+    font-style: italic;
+}
+
+.input-title {
+    font-size: 4.0em;
+    margin-bottom: 20px;
+}
+
+.input-inner-wrapper {
+    font-size: 4.0em;
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.1em;
+    transform: skew(-12deg);
+    -webkit-transform: skew(-12deg);
+    -moz-transform: skew(-12deg);
+    -ms-transform: skew(-12deg);
+    -o-transform: skew(-12deg);
+}
+
+.input-field {
+    flex: 1;
+    border: 1px solid #ffdb1c;
+    border-radius: 7px;
+    background-color: #ffdb1c;
+    font-size: 0.4em;
+    padding: 10px 15px 10px 15px;
+    color: #222222;
+    outline: none;
+    font-weight: 600;
+}
+
+.submit-button {
+    background-color: white;
+    border: 0px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.3em;
+    color: #222222;
+    padding: 15px;
+}
+
+::placeholder {
+    color: #222222
+}
+
+:-ms-input-placeholder {
+    color: #222222
+}
+
+::-ms-input-placeholder {
+    color: #222222
+}
+
+.anim-typewriter{
+  animation: typewriter 4s steps(44) 1s 1 normal both,
+  blinkTextCursor 500ms steps(44) infinite normal;
+}
+
+@keyframes typewriter{
+  from{width: 0;}
+  to{width: 24em;}
+}
+
+@keyframes blinkTextCursor{
+  from{border-right-color: rgba(255,255,255,.75);}
+  to{border-right-color: transparent;}
+}
+
+.anim-line {
+    border-right: 2px solid rgba(255,255,255,.75);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.output {
+    animation: typewriter 4s steps(44) 1 normal both,
+    blinkTextCursor 500ms steps(44) infinite normal;
+}
+
+.server-says {
+    margin-bottom: 25px;
+    background-color: #ffdb1c;
+    width: fit-content;
+    padding: 10px 20px 10px 20px;
+    transform: skewX(-14deg);
+    color: #222222;
+    opacity: 0;
+}
+
+@keyframes blinkTextCursor{
+  from{border-right-color: rgba(255,255,255,.75);}
+  to{border-right-color: transparent;}
+}
