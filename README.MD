@@ -1,5 +1,9 @@
 ## How to run
 
+Requirements:
+- JAVA_HOME must be pointing to java 11
+
+
 Clean and build the web app
 ```
 mvn clean install
