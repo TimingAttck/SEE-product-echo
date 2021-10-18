@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class EchoController {
 
-    @GetMapping("/echo")
+    @GetMapping("/api/echo")
     public EchoResponse echo(@RequestParam(value="name", required=true) String name) {
 
-        if (name.isBlank() || name.isEmpty())
+        if (name.isEmpty())
             name = "Anon";
 
         return new EchoResponse("Hello "+name+", you are awesome :)");

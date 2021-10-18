@@ -33,7 +33,7 @@ class EchoEndpointTest {
 		String expected = "Hello Anon, you are awesome :)";
 
 		this.mockMvc
-				.perform(get("/echo?name="))
+				.perform(get("/api/echo?name="))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.msg").value(expected));
 	}
@@ -42,7 +42,7 @@ class EchoEndpointTest {
 	public void echoShouldReturnExceptionIfNameParamMissing() throws Exception {
 
 		this.mockMvc
-				.perform(get("/echo"))
+				.perform(get("/api/echo"))
 				.andExpect(status().is(400));
 
 	}
@@ -53,7 +53,7 @@ class EchoEndpointTest {
 		String expected = "Hello Claude, you are awesome :)";
 
 		this.mockMvc
-				.perform(get("/echo?name=Claude"))
+				.perform(get("/api/echo?name=Claude"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.msg").value(expected));
 	}

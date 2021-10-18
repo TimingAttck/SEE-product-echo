@@ -73,7 +73,7 @@ function sendEchoRequest(name, success, error) {
         $.ajax({
             type: "GET",
             contentType: "application/json",
-            url: "/echo",
+            url: "api/echo",
             data: {
                 "name": name
             },
@@ -83,8 +83,8 @@ function sendEchoRequest(name, success, error) {
             success: function (data, status) {
                 success(data)
             },
-            error: function (xhr, textStatus, error) {
-                error(error)
+            error: function (xhr, textStatus, err) {
+                error(err)
             },
         });
 
