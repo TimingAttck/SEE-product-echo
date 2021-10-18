@@ -1,7 +1,7 @@
 ## How to run
 
 Requirements:
-- JAVA_HOME must be pointing to java 11
+- JAVA_HOME must be pointing to java 8
 
 
 Clean and build the web app
