@@ -35,19 +35,21 @@ fi
 
 # Shutdown Tomcat
 echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
-sh $APACHE_BIN/shutdown.sh
+sudo sh $APACHE_BIN/shutdown.sh
 
 sleep 3
 
 cd $APACHE_WEBAPPS
+sudo rm -R ROOT
+sudo rm ROOT.war
 # PRODUCT_SNAPSHOT_NAME_RAW=$(echo "$PRODUCT_SNAPSHOT_NAME" | sed 's/.war//')
 # touch "$PRODUCT_SNAPSHOT_NAME_RAW.association"
-mv $PRODUCT_SNAPSHOT_PATH ROOT.war
-chown tomcat:tomcat ROOT.war
+sudo mv $PRODUCT_SNAPSHOT_PATH ROOT.war
+sudo chown tomcat:tomcat ROOT.war
 
 # Start up Tomcat
 echo -e '\n\033[0;34mStarting Tomcat\033[0m\n';
-sh $APACHE_BIN/startup.sh
+sudo sh $APACHE_BIN/startup.sh
 
 sleep 6
 
