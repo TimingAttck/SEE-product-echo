@@ -3,7 +3,7 @@
 # check if script is executed as sudo
 if [ "$EUID" -ne 0 ]
   then echo -e "\033[0;31mPlease run as root\033[0m"
-  exit
+  exit 1
 fi
 
 # Define Tomcat's variables
