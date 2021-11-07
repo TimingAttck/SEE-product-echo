@@ -2,6 +2,7 @@
 
 Requirements:
 - JAVA_HOME must be pointing to java 8
+- Maven 3.6.3 or higher
 
 
 Clean and build the web app
