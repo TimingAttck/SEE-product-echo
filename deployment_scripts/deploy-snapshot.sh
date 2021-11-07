@@ -10,12 +10,14 @@ fi
 APACHE_HOME=/opt/tomcat
 APACHE_BIN=$APACHE_HOME/bin
 APACHE_WEBAPPS=$APACHE_HOME/webapps
+APACHE_WEBAPPS_BACKUPS=$APACHE_HOME/webapps_backups
 
 # Define product's variables
-PRODUCT_SNAPSHOT_NAME=$1
+PRODUCT_SNAPSHOT_PATH=$1
+PRODUCT_SNAPSHOT_NAME=$2
 
 # Check if .war file exists
-file=$PRODUCT_SNAPSHOT_NAME
+file=$PRODUCT_SNAPSHOT_PATH
 
 if [ ! -f "$file" ]
 then
@@ -24,24 +26,30 @@ then
 fi
 
 # Remove the previous root deployment
-cp $APACHE_WEBAPPS/ROOT.war $APACHE_WEBAPPS/ROOT-backup.war 2> /dev/null
-rm $APACHE_WEBAPPS/ROOT.war 2> /dev/null
+# but back it up first
+# cd $APACHE_WEBAPPS
+# OLD_DEPLOYMENT=$(find . -name 'current*' | grep ".association" | sed 's/.\///')
+# BACKUP_NAME=$(echo "$OLD_DEPLOYMENT" | sed 's/current-//' | sed 's/.association//')
+# BACKUP_ARTIFACT_NAME="$BACKUP_NAME.war"
+# sudo mv $APACHE_WEBAPPS/ROOT.war $APACHE_WEBAPPS_BACKUPS/$BACKUP_ARTIFACT_NAME
 
 # Shutdown Tomcat
 echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
 sh $APACHE_BIN/shutdown.sh
 
-cp $PRODUCT_SNAPSHOT_NAME $APACHE_WEBAPPS
-cd $APACHE_WEBAPPS
+sleep 3
 
-mv $PRODUCT_SNAPSHOT_NAME ROOT.war
+cd $APACHE_WEBAPPS
+# PRODUCT_SNAPSHOT_NAME_RAW=$(echo "$PRODUCT_SNAPSHOT_NAME" | sed 's/.war//')
+# touch "$PRODUCT_SNAPSHOT_NAME_RAW.association"
+mv $PRODUCT_SNAPSHOT_PATH ROOT.war
 chown tomcat:tomcat ROOT.war
 
 # Start up Tomcat
 echo -e '\n\033[0;34mStarting Tomcat\033[0m\n';
 sh $APACHE_BIN/startup.sh
 
-sleep 8
+sleep 6
 
 url=127.0.0.1
 port=8080
@@ -51,9 +59,10 @@ if [ "$status" = "200" ]
 then
   echo -e '\n\033[0;32mDeployment succeeded\033[0m\n';
 else
-  echo -e '\n\033[0;31mDeployment failed; restoring previous deployment\033[0m'
+  echo -e '\n\033[0;31mDeployment failed\033[0m'
   echo -e "\033[0;31mServer http error code: ${status}\033[0m\n"
   echo -e '\033[0;31mCheck log files under: /opt/tomcat/logs\033[0m\n'
-  mv $APACHE_WEBAPPS/ROOT-backup.war $APACHE_WEBAPPS/ROOT.war 2> /dev/null
+  # rm $APACHE_WEBAPPS/ROOT.war 2> /dev/null
+  # mv $APACHE_WEBAPPS_BACKUPS/$BACKUP_ARTIFACT_NAME $APACHE_WEBAPPS/ROOT.war 2> /dev/null
   exit 1
 fi
