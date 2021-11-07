@@ -31,7 +31,7 @@ rm $APACHE_WEBAPPS/ROOT.war 2> /dev/null
 echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
 sh $APACHE_BIN/shutdown.sh
 
-cp /vagrant_target/$PRODUCT_SNAPSHOT_NAME $APACHE_WEBAPPS
+cp $PRODUCT_SNAPSHOT_NAME $APACHE_WEBAPPS
 cd $APACHE_WEBAPPS
 
 mv $PRODUCT_SNAPSHOT_NAME ROOT.war
@@ -41,7 +41,7 @@ chown tomcat:tomcat ROOT.war
 echo -e '\n\033[0;34mStarting Tomcat\033[0m\n';
 sh $APACHE_BIN/startup.sh
 
-sleep 2
+sleep 8
 
 url=127.0.0.1
 port=8080
