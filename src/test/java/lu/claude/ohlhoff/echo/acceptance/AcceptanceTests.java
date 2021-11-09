@@ -89,7 +89,7 @@ public class AcceptanceTests {
         Thread.sleep(animationDuration);
         
         // Retrieve the text responded by the server
-        String actual = driver.findElement(By.id("server-says")).getText();
+        String actual = driver.findElement(By.id("output")).getText();
         
         // Validate the result
         assertEquals(expected, actual);
