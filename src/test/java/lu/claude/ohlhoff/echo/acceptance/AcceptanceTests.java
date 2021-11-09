@@ -20,7 +20,7 @@ public class AcceptanceTests {
     WebDriver driver;
 
     // Get environment variable for the server address
-    private static String serverBaseURL= System.getenv("SERVER_BASE_URL");
+    private static String serverBaseURL= System.getProperty("SERVER_BASE_URL");
 
     // Testing constants (might need to be adapted when assumptions change)
     private final String expectedNoName = "Hello Anon, you are awesome :)";
@@ -31,6 +31,11 @@ public class AcceptanceTests {
 
     @BeforeEach
     public void confiugreDriver() throws MalformedURLException {
+
+
+        System.out.println("==============================================================");
+        System.out.println("==============================="+serverBaseURL+"===============================");
+
         final ChromeOptions chromeOptions = new ChromeOptions();
 		chromeOptions.addArguments("--headless");
 		chromeOptions.addArguments("--no-sandbox");
