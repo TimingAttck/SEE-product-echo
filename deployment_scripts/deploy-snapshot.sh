@@ -50,7 +50,7 @@ deploy() {
   sudo rm ROOT.war
   # PRODUCT_SNAPSHOT_NAME_RAW=$(echo "$PRODUCT_SNAPSHOT_NAME" | sed 's/.war//')
   # touch "$PRODUCT_SNAPSHOT_NAME_RAW.association"
-  sudo mv $PRODUCT_SNAPSHOT_PATH ROOT.war
+  sudo cp $PRODUCT_SNAPSHOT_PATH ROOT.war
   sudo chown tomcat:tomcat ROOT.war
 
   # Start up Tomcat
@@ -70,9 +70,11 @@ deploy() {
     let "trials=trials+1"
   fi
 
-  if [ "$trails" = "5" ]
+  if [ "$trials" = "5" ]
   then
     return 1
+  else
+    deploy
   fi
 
 }
