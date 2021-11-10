@@ -33,31 +33,53 @@ fi
 # BACKUP_ARTIFACT_NAME="$BACKUP_NAME.war"
 # sudo mv $APACHE_WEBAPPS/ROOT.war $APACHE_WEBAPPS_BACKUPS/$BACKUP_ARTIFACT_NAME
 
-# Shutdown Tomcat
-echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
-sudo sh $APACHE_BIN/shutdown.sh
 
-sleep 3
+# the tomcat server sometimes just randomly fails to restart
+# thus re-try it at max 5 times
 
-cd $APACHE_WEBAPPS
-sudo rm -R ROOT
-sudo rm ROOT.war
-# PRODUCT_SNAPSHOT_NAME_RAW=$(echo "$PRODUCT_SNAPSHOT_NAME" | sed 's/.war//')
-# touch "$PRODUCT_SNAPSHOT_NAME_RAW.association"
-sudo mv $PRODUCT_SNAPSHOT_PATH ROOT.war
-sudo chown tomcat:tomcat ROOT.war
+trials=0
+deploy() {
+  # Shutdown Tomcat
+  echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
+  sudo sh $APACHE_BIN/shutdown.sh
 
-# Start up Tomcat
-echo -e '\n\033[0;34mStarting Tomcat\033[0m\n';
-sudo sh $APACHE_BIN/startup.sh
+  sleep 3
 
-sleep 6
+  cd $APACHE_WEBAPPS
+  sudo rm -R ROOT
+  sudo rm ROOT.war
+  # PRODUCT_SNAPSHOT_NAME_RAW=$(echo "$PRODUCT_SNAPSHOT_NAME" | sed 's/.war//')
+  # touch "$PRODUCT_SNAPSHOT_NAME_RAW.association"
+  sudo mv $PRODUCT_SNAPSHOT_PATH ROOT.war
+  sudo chown tomcat:tomcat ROOT.war
 
-url=127.0.0.1
-port=8080
-status=$(wget --server-response --spider --quiet "${url}:${port}" 2>&1 | awk 'NR==1{print $2}')
+  # Start up Tomcat
+  echo -e '\n\033[0;34mStarting Tomcat\033[0m\n';
+  sudo sh $APACHE_BIN/startup.sh
 
-if [ "$status" = "200" ]
+  sleep 6
+
+  url=127.0.0.1
+  port=8080
+  status=$(wget --server-response --spider --quiet "${url}:${port}" 2>&1 | awk 'NR==1{print $2}')
+
+  if [ "$status" = "200" ]
+  then
+    return 0
+  else
+    let "trials=trials+1"
+  fi
+
+  if [ "$trails" = "5" ]
+  then
+    return 1
+  fi
+
+}
+
+deploy
+
+if [ "$?" = "0" ]
 then
   echo -e '\n\033[0;32mDeployment succeeded\033[0m\n';
 else
