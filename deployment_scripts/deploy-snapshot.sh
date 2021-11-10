@@ -1,5 +1,14 @@
 #!/bin/bash
 
+
+############################################
+#                                          #
+#         Deployment of a snapshot         #
+#            to a Tomcat server            #
+#                                          #
+############################################
+
+
 # check if script is executed as sudo
 if [ "$EUID" -ne 0 ]
   then echo -e "\033[0;31mPlease run as root\033[0m"
@@ -25,20 +34,17 @@ then
   exit 1
 fi
 
-# Remove the previous root deployment
-# but back it up first
-# cd $APACHE_WEBAPPS
-# OLD_DEPLOYMENT=$(find . -name 'current*' | grep ".association" | sed 's/.\///')
-# BACKUP_NAME=$(echo "$OLD_DEPLOYMENT" | sed 's/current-//' | sed 's/.association//')
-# BACKUP_ARTIFACT_NAME="$BACKUP_NAME.war"
-# sudo mv $APACHE_WEBAPPS/ROOT.war $APACHE_WEBAPPS_BACKUPS/$BACKUP_ARTIFACT_NAME
 
-
-# the tomcat server sometimes just randomly fails to restart
-# thus re-try it at max 5 times
-
+#
+# the tomcat server sometimes just randomly fails to correctly restart
+# and the worst thing is that it fails SILENTLY
+# thus re-try the deployment at max 5 times when the server did not respond
+# with the correct 200 http status code
+#
+status=""
 trials=0
 deploy() {
+
   # Shutdown Tomcat
   echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
   sudo sh $APACHE_BIN/shutdown.sh
@@ -46,10 +52,12 @@ deploy() {
   sleep 3
 
   cd $APACHE_WEBAPPS
+
+  # Remove previous snapshot .war files
   sudo rm -R ROOT
   sudo rm ROOT.war
-  # PRODUCT_SNAPSHOT_NAME_RAW=$(echo "$PRODUCT_SNAPSHOT_NAME" | sed 's/.war//')
-  # touch "$PRODUCT_SNAPSHOT_NAME_RAW.association"
+
+  # Copy the snapshot into the webapps folder
   sudo cp $PRODUCT_SNAPSHOT_PATH ROOT.war
   sudo chown tomcat:tomcat ROOT.war
 
@@ -59,10 +67,12 @@ deploy() {
 
   sleep 6
 
+  # Send a request to the server and check its status code
   url=127.0.0.1
   port=8080
   status=$(wget --server-response --spider --quiet "${url}:${port}" 2>&1 | awk 'NR==1{print $2}')
 
+  # Check the status code
   if [ "$status" = "200" ]
   then
     return 0
@@ -70,25 +80,32 @@ deploy() {
     let "trials=trials+1"
   fi
 
+  # Check if we have re-tried the deployment 5 times
   if [ "$trials" = "5" ]
   then
     return 1
   else
+    # Recurisve call
     deploy
   fi
 
 }
 
+# Do the deployment
 deploy
 
+# Check the result of the deployment
 if [ "$?" = "0" ]
 then
   echo -e '\n\033[0;32mDeployment succeeded\033[0m\n';
 else
   echo -e '\n\033[0;31mDeployment failed\033[0m'
-  echo -e "\033[0;31mServer http error code: ${status}\033[0m\n"
+  if ! [[ "$status" =~ ^[0-9]+$ ]]
+  then
+    echo -e "\033[0;31mServer is unreachable\033[0m\n"
+  else
+    echo -e "\033[0;31mServer http error code: ${status}\033[0m\n"
+  fi
   echo -e '\033[0;31mCheck log files under: /opt/tomcat/logs\033[0m\n'
-  # rm $APACHE_WEBAPPS/ROOT.war 2> /dev/null
-  # mv $APACHE_WEBAPPS_BACKUPS/$BACKUP_ARTIFACT_NAME $APACHE_WEBAPPS/ROOT.war 2> /dev/null
   exit 1
 fi
