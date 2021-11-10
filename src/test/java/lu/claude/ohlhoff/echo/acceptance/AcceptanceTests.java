@@ -31,11 +31,6 @@ public class AcceptanceTests {
 
     @BeforeEach
     public void confiugreDriver() throws MalformedURLException {
-
-
-        System.out.println("==============================================================");
-        System.out.println("==============================="+serverBaseURL+"===============================");
-
         final ChromeOptions chromeOptions = new ChromeOptions();
 		chromeOptions.addArguments("--headless");
 		chromeOptions.addArguments("--no-sandbox");
