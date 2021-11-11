@@ -9,6 +9,13 @@ document.getElementById("name").addEventListener("input", (event) => {
     document.getElementById("output").innerHTML = "";
 })
 
+document.getElementById("name").addEventListener("keyup", function(event) {
+    event.preventDefault();
+    if (event.key === "Enter") {
+        document.getElementById("submit_button").click();
+    }
+});
+
 function sendName() {
 
     document.getElementById("output").innerHTML = "";
