@@ -63,7 +63,7 @@ deploy() {
 
 
   # Remove cached files of the last deployment
-  rm -R work/Catalina/localhost/ROOT
+  rm -R $APACHE_BIN/work/Catalina/localhost/ROOT
 
   # Copy the last deployment for possible rollbacks
   cd $APACHE_WEBAPPS_BACKUPS
