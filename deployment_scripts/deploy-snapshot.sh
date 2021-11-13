@@ -49,7 +49,17 @@ deploy() {
   echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
   sudo sh $APACHE_BIN/shutdown.sh
 
-  sleep 3
+  sleep 6
+
+  # Tomcat is such a bad application server, that its threads just sometimes get stuck 
+  # and prevent starting a new instance, therefore kill them all
+  pids=$(ps -awwef | grep tomcat | awk '{ print$2 }')
+  if ! [ -z "$pid" ]
+  then
+    echo "$pids" | while read -r pid ; do
+      sudo kill -15 $pid
+    done
+  fi
 
 
   # Copy the last deployment for possible rollbacks
