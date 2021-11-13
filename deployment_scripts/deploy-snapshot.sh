@@ -49,8 +49,7 @@ echo "Undeploy last candidate (if any)"
 curl "http://admin:admin@127.0.0.1:8080/manager/text/undeploy?path=/"
 
 # Remove cached files of the last deployment
-cd $APACHE_HOME/work/Catalina/localhost/ROOT
-rm -R *
+cd $APACHE_HOME/work/Catalina/localhost/ROOT && rm -R *
 
 # Freshly deploy the new candidate
 echo "Deploy the new candidate"
