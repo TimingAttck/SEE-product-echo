@@ -29,4 +29,5 @@ then
     echo "Deployment succeeded"
 else 
     echo "Deployment failed; HTTP error code $status"
+    exit 1
 fi
