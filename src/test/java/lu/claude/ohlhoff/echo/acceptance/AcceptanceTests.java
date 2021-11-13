@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -17,7 +19,7 @@ import org.openqa.selenium.Platform;
 
 public class AcceptanceTests {
 
-    WebDriver driver;
+    static WebDriver driver;
 
     // Get environment variable for the server address
     private static String serverBaseURL= System.getProperty("SERVER_BASE_URL");
@@ -29,8 +31,8 @@ public class AcceptanceTests {
     private final int animationDuration = 6000;
 
 
-    @BeforeEach
-    public void confiugreDriver() throws MalformedURLException {
+    @BeforeAll
+    public static void confiugreDriver() throws MalformedURLException {
         final ChromeOptions chromeOptions = new ChromeOptions();
 		chromeOptions.addArguments("--headless");
 		chromeOptions.addArguments("--no-sandbox");
@@ -90,8 +92,8 @@ public class AcceptanceTests {
         assertEquals(expected, actual);
     }
 
-    @AfterEach
-    public void tearDown() {
+    @AfterAll
+    public static void tearDown() {
         driver.quit();
     }
 
