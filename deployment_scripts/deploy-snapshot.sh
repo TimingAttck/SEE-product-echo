@@ -62,6 +62,9 @@ deploy() {
   fi
 
 
+  # Remove cached files of the last deployment
+  rm -R work/Catalina/localhost/ROOT
+
   # Copy the last deployment for possible rollbacks
   cd $APACHE_WEBAPPS_BACKUPS
   sudo cp $APACHE_WEBAPPS/ROOT.war ROOT.war
