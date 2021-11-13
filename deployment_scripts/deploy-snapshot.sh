@@ -51,15 +51,29 @@ deploy() {
 
   sleep 3
 
-  cd $APACHE_WEBAPPS
+
+  # Copy the last deployment for possible rollbacks
+  cd $APACHE_WEBAPPS_BACKUPS
+  sudo cp $APACHE_WEBAPPS/ROOT.war ROOT.war
+  commit_hash=$(sudo cat $APACHE_WEBAPPS/ROOT.association)
+  sudo mv ROOT.war "$commit_hash".war
+
 
   # Remove previous snapshot .war files
+  cd $APACHE_WEBAPPS
   sudo rm -R ROOT
   sudo rm ROOT.war
+
 
   # Copy the snapshot into the webapps folder
   sudo cp $PRODUCT_SNAPSHOT_PATH ROOT.war
   sudo chown tomcat:tomcat ROOT.war
+
+
+  # Save the association file, needed for rollbacks
+  commit_hash=${PRODUCT_SNAPSHOT_NAME%.*}
+  sudo echo "$commit_hash" > ROOT.association
+
 
   # Start up Tomcat
   echo -e '\n\033[0;34mStarting Tomcat\033[0m\n';
