@@ -15,11 +15,12 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
-# Define Tomcat's variables
+
 APACHE_HOME=/opt/tomcat
 APACHE_BIN=$APACHE_HOME/bin
 APACHE_WEBAPPS=$APACHE_HOME/webapps
-APACHE_WEBAPPS_BACKUPS=$APACHE_HOME/webapps_backups
+CANDIDATES_FOLDER=/home/vagrant/candidates
+CANDIDATES_BACKUP_FOLDER=/home/vagrant/candidates_backups
 
 # Define product's variables
 PRODUCT_SNAPSHOT_PATH=$1
@@ -34,105 +35,29 @@ then
   exit 1
 fi
 
+# Copy the last deployment for possible rollbacks
+commit_hash=$(sudo cat $CANDIDATES_FOLDER/ROOT.association)
+sudo cp $CANDIDATES_FOLDER/ROOT.war $CANDIDATES_BACKUP_FOLDER/"$commit_hash".war
 
-#
-# the tomcat server sometimes just randomly fails to correctly restart
-# and the worst thing is that it fails SILENTLY
-# thus re-try the deployment at max 5 times when the server did not respond
-# with the correct 200 http status code
-#
-status=""
-trials=0
-deploy() {
+# Change the name of the current candidate to ROOT
+mv $PRODUCT_SNAPSHOT_PATH $CANDIDATES_FOLDER/ROOT.war
+commit_hash=${PRODUCT_SNAPSHOT_NAME%.*}
+sudo echo "$commit_hash" > $CANDIDATES_FOLDER/ROOT.association
 
-  # Shutdown Tomcat
-  echo -e '\n\033[0;34mShutting down Tomcat\033[0m\n';
-  sudo sh $APACHE_BIN/shutdown.sh
+# Undeploy the last candidate (if any)
+echo "Undeploy last candidate (if any)"
+curl "http://admin:admin@127.0.0.1:8080/manager/text/undeploy?path=/"
 
-  sleep 6
+# Remove cached files of the last deployment
+cd $APACHE_HOME/work/Catalina/localhost/ROOT
+rm -R *
 
-  # Tomcat is such a bad application server, that its threads just sometimes get stuck 
-  # and prevent starting a new instance, therefore kill them all
-  pids=$(ps -awwef | grep tomcat | awk '{ print$2 }')
-  if ! [ -z "$pid" ]
-  then
-    echo "$pids" | while read -r pid ; do
-      sudo kill -15 $pid
-    done
-  fi
+# Freshly deploy the new candidate
+echo "Deploy the new candidate"
+DEPLOYMENT_OUTPUT=$(curl --upload-file $CANDIDATES_FOLDER/ROOT.war "http://admin:admin@127.0.0.1:8080/manager/text/deploy?path=")
 
-
-  # Remove cached files of the last deployment
-  rm -R $APACHE_BIN/work/Catalina/localhost/ROOT
-
-  # Copy the last deployment for possible rollbacks
-  cd $APACHE_WEBAPPS_BACKUPS
-  sudo cp $APACHE_WEBAPPS/ROOT.war ROOT.war
-  commit_hash=$(sudo cat $APACHE_WEBAPPS/ROOT.association)
-  sudo mv ROOT.war "$commit_hash".war
-
-
-  # Remove previous snapshot .war files
-  cd $APACHE_WEBAPPS
-  sudo rm -R ROOT
-  sudo rm ROOT.war
-
-
-  # Copy the snapshot into the webapps folder
-  sudo cp $PRODUCT_SNAPSHOT_PATH ROOT.war
-  sudo chown tomcat:tomcat ROOT.war
-
-
-  # Save the association file, needed for rollbacks
-  commit_hash=${PRODUCT_SNAPSHOT_NAME%.*}
-  sudo echo "$commit_hash" > ROOT.association
-
-
-  # Start up Tomcat
-  echo -e '\n\033[0;34mStarting Tomcat\033[0m\n';
-  sudo sh $APACHE_BIN/startup.sh
-
-  sleep 6
-
-  # Send a request to the server and check its status code
-  url=127.0.0.1
-  port=8080
-  status=$(wget --server-response --spider --quiet "${url}:${port}" 2>&1 | awk 'NR==1{print $2}')
-
-  # Check the status code
-  if [ "$status" = "200" ]
-  then
-    return 0
-  else
-    let "trials=trials+1"
-  fi
-
-  # Check if we have re-tried the deployment 5 times
-  if [ "$trials" = "5" ]
-  then
-    return 1
-  else
-    # Recurisve call
-    deploy
-  fi
-
-}
-
-# Do the deployment
-deploy
-
-# Check the result of the deployment
-if [ "$?" = "0" ]
+if [ "$DEPLOYMENT_OUTPUT" != "OK - Deployed application at context path [/]" ]
 then
-  echo -e '\n\033[0;32mDeployment succeeded\033[0m\n';
-else
-  echo -e '\n\033[0;31mDeployment failed\033[0m'
-  if ! [[ "$status" =~ ^[0-9]+$ ]]
-  then
-    echo -e "\033[0;31mServer is unreachable\033[0m\n"
-  else
-    echo -e "\033[0;31mServer http error code: ${status}\033[0m\n"
-  fi
-  echo -e '\033[0;31mCheck log files under: /opt/tomcat/logs\033[0m\n'
+  echo -e "\n\033[0;31mDeployment failed; Response did not match expected; expected response: 'OK - Deployed application at context path [/]'; actual response: '$DEPLOYMENT_OUTPUT'\033[0m\n"
   exit 1
 fi
