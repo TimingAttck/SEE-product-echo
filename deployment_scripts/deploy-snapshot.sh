@@ -46,11 +46,11 @@ sudo echo "$commit_hash" > $CANDIDATES_FOLDER/ROOT.association
 
 # Stop the last candidate (if any)
 echo "Undeploy broken candidate (if any)"
-curl "http://admin:admin@127.0.0.1:8080/manager/text/stop?path=/"
+curl "http://admin:admin@127.0.0.1:8080/manager/text/stop?path="
 
 # Undeploy the last candidate (if any)
 echo "Undeploy last candidate (if any)"
-curl "http://admin:admin@127.0.0.1:8080/manager/text/undeploy?path=/"
+curl "http://admin:admin@127.0.0.1:8080/manager/text/undeploy?path="
 
 # Remove cached files of the last deployment
 cd $APACHE_HOME/work/Catalina/localhost/ROOT && rm -R * 2> /dev/null
